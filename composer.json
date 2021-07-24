@@ -1,0 +1,30 @@
+{
+    "name": "articus/openapi-generator-apiclient",
+    "description": "Common classes for php-dt generator of OpenAPI Generator",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": "^7.1|^8.0",
+        "articus/data-transfer": "^0.5",
+        "psr/container": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.0",
+        "laminas/laminas-servicemanager": "^3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "spec\\": "spec/"
+        }
+    },
+    "require-dev": {
+        "ext-uopz": "*",
+        "kahlan/kahlan": "^5.1",
+        "mockery/mockery": "^1.3"
+    }
+}
