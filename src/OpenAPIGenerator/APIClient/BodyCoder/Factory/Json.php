@@ -3,31 +3,27 @@ declare(strict_types=1);
 
 namespace OpenAPIGenerator\APIClient\BodyCoder\Factory;
 
-use Articus\DataTransfer\ConfigAwareFactory;
-use Interop\Container\ContainerInterface;
+use Articus\PluginManager as PM;
 use OpenAPIGenerator\APIClient as OAGAC;
-use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Container\ContainerInterface;
 
-class Json extends ConfigAwareFactory
+class Json implements PM\ServiceFactoryInterface
 {
+	use PM\ConfigAwareFactoryTrait;
+
 	public function __construct(string $configKey = OAGAC\BodyCoder\Json::class)
 	{
-		parent::__construct($configKey);
+		$this->configKey = $configKey;
 	}
 
-	public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+	public function __invoke(ContainerInterface $container, string $name): OAGAC\BodyCoder\Json
 	{
-		$config = new OAGAC\BodyCoder\Options\Json(\array_merge($this->getServiceConfig($container), $options ?? []));
+		$config = new OAGAC\BodyCoder\Options\Json($this->getServiceConfig($container));
 		return new OAGAC\BodyCoder\Json(
-			$this->getStreamFactory($container, $config->streamFactoryServiceName),
+			$container->get($config->streamFactoryServiceName),
 			$config->encodeFlags,
 			$config->decodeFlags,
 			$config->depth
 		);
-	}
-
-	protected function getStreamFactory(ContainerInterface $container, string $serviceName): StreamFactoryInterface
-	{
-		return $container->get($serviceName);
 	}
 }

@@ -9,35 +9,20 @@ use Psr\Http\Message\RequestFactoryInterface;
 
 class ApiClientOptions
 {
-	/**
-	 * @var string
-	 */
-	public $serverUrl = 'http://localhost';
+	public const DEFAULT_SECURITY_PROVIDER_PLUGIN_MANAGER = 'OpenAPIGenerator\APIClient\SecurityProvider\PluginManager';
+	public const DEFAULT_BODY_CODER_PLUGIN_MANAGER = 'OpenAPIGenerator\APIClient\BodyCoder\PluginManager';
 
-	/**
-	 * @var string
-	 */
-	public $dataTransferServiceName = DTService::class;
+	public string $serverUrl = 'http://localhost';
 
-	/**
-	 * @var string
-	 */
-	public $requestFactoryServiceName = RequestFactoryInterface::class;
+	public string $dataTransferServiceName = DTService::class;
 
-	/**
-	 * @var string
-	 */
-	public $httpClientServiceName = ClientInterface::class;
+	public string $requestFactoryServiceName = RequestFactoryInterface::class;
 
-	/**
-	 * @var string
-	 */
-	public $securityProviderFactoryServiceName = SecurityProvider\PluginManager::class;
+	public string $httpClientServiceName = ClientInterface::class;
 
-	/**
-	 * @var string
-	 */
-	public $bodyCoderFactoryServiceName = BodyCoder\PluginManager::class;
+	public string $securityProviderFactoryServiceName = self::DEFAULT_SECURITY_PROVIDER_PLUGIN_MANAGER;
+
+	public string $bodyCoderFactoryServiceName = self::DEFAULT_BODY_CODER_PLUGIN_MANAGER;
 
 	public function __construct(iterable $options)
 	{

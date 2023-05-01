@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace OpenAPIGenerator\APIClient\Exception;
 
-class UnsuccessfulResponse extends \Exception
+use Exception;
+use Throwable;
+
+class UnsuccessfulResponse extends Exception
 {
 	/**
 	 * @var mixed
@@ -13,20 +16,21 @@ class UnsuccessfulResponse extends \Exception
 	/**
 	 * @var string[][]
 	 */
-	protected $responseHeaders;
+	protected iterable $responseHeaders;
 
 	/**
-	 * @param mixed $responseContent
+	 * @param $responseContent
 	 * @param string[][] $responseHeaders
 	 * @param int $responseStatusCode
 	 * @param string $responseReasonPhrase
+	 * @param Throwable|null $previous
 	 */
 	public function __construct(
 		$responseContent,
 		iterable $responseHeaders,
 		int $responseStatusCode,
 		string $responseReasonPhrase,
-		\Throwable $previous = null
+		Throwable $previous = null
 	)
 	{
 		parent::__construct($responseReasonPhrase, $responseStatusCode, $previous);
@@ -45,7 +49,7 @@ class UnsuccessfulResponse extends \Exception
 	/**
 	 * @return string[][]
 	 */
-	public function getResponseHeaders(): array
+	public function getResponseHeaders(): iterable
 	{
 		return $this->responseHeaders;
 	}

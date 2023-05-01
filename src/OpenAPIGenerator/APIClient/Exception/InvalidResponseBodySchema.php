@@ -3,25 +3,17 @@ declare(strict_types=1);
 
 namespace OpenAPIGenerator\APIClient\Exception;
 
+use Exception;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
-class InvalidResponseBodySchema extends \Exception
+class InvalidResponseBodySchema extends Exception
 {
-	/**
-	 * @var ResponseInterface
-	 */
-	protected $response;
+	protected ResponseInterface $response;
 
-	/**
-	 * @var array
-	 */
-	protected $violations;
+	protected array $violations;
 
-	/**
-	 * @param ResponseInterface $response
-	 * @param array $violations
-	 */
-	public function __construct(ResponseInterface $response, array $violations = [], \Throwable $previous = null)
+	public function __construct(ResponseInterface $response, array $violations = [], Throwable $previous = null)
 	{
 		parent::__construct('Invalid response body schema', 0, $previous);
 		$this->response = $response;

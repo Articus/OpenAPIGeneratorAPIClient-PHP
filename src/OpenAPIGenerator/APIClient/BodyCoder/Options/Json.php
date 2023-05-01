@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace OpenAPIGenerator\APIClient\BodyCoder\Options;
 
 use Psr\Http\Message\StreamFactoryInterface;
+use const JSON_OBJECT_AS_ARRAY;
 
 class Json
 {
@@ -11,25 +12,25 @@ class Json
 	 * Service name for stream factory implementation inside container
 	 * @var string
 	 */
-	public $streamFactoryServiceName = StreamFactoryInterface::class;
+	public string $streamFactoryServiceName = StreamFactoryInterface::class;
 
 	/**
 	 * Flags for json_encode
 	 * @var int
 	 */
-	public $encodeFlags = 0;
+	public int $encodeFlags = 0;
 
 	/**
 	 * Flags for json_decode
 	 * @var int
 	 */
-	public $decodeFlags = \JSON_OBJECT_AS_ARRAY;
+	public int $decodeFlags = JSON_OBJECT_AS_ARRAY;
 
 	/**
 	 * Depth for json_encode and json_decode
 	 * @var int
 	 */
-	public $depth = 512;
+	public int $depth = 512;
 
 	public function __construct(iterable $options)
 	{

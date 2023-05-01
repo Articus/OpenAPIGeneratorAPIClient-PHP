@@ -5,11 +5,16 @@ namespace OpenAPIGenerator\APIClient;
 
 use Articus\DataTransfer\Exception as DTException;
 use Articus\DataTransfer\Service as DTService;
-use Psr\Container\ContainerInterface;
+use Articus\PluginManager\PluginManagerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use function http_build_query;
+use function is_object;
+use function rawurlencode;
+use function strtr;
+use const PHP_QUERY_RFC3986;
 
 abstract class AbstractApiClient
 {
@@ -21,55 +26,46 @@ abstract class AbstractApiClient
 	/**
 	 * @var string
 	 */
-	protected $serverUrl;
+	protected string $serverUrl;
 
 	/**
 	 * @var DTService
 	 */
-	protected $dt;
+	protected DTService $dt;
 
 	/**
 	 * @var RequestFactoryInterface
 	 */
-	protected $requestFactory;
+	protected RequestFactoryInterface $requestFactory;
 
 	/**
 	 * @var ClientInterface
 	 */
-	protected $httpClient;
+	protected ClientInterface $httpClient;
 
 	/**
-	 * @var ContainerInterface
+	 * @var PluginManagerInterface<SecurityProviderInterface>
 	 */
-	protected $securityProviderFactory;
+	protected PluginManagerInterface $securityProviderFactory;
 
 	/**
-	 * @var ContainerInterface
+	 * @var PluginManagerInterface<BodyEncoderInterface>
 	 */
-	protected $bodyEncoderFactory;
+	protected PluginManagerInterface $bodyEncoderFactory;
 
 	/**
-	 * @var ContainerInterface
+	 * @var PluginManagerInterface<BodyDecoderInterface>
 	 */
-	protected $bodyDecoderFactory;
+	protected PluginManagerInterface $bodyDecoderFactory;
 
-	/**
-	 * @param string $serverUrl
-	 * @param DTService $dt
-	 * @param RequestFactoryInterface $requestFactory
-	 * @param ClientInterface $httpClient
-	 * @param ContainerInterface $securityProviderFactory
-	 * @param ContainerInterface $bodyEncoderFactory
-	 * @param ContainerInterface $bodyDecoderFactory
-	 */
 	public function __construct(
 		string $serverUrl,
 		DTService $dt,
 		RequestFactoryInterface $requestFactory,
 		ClientInterface $httpClient,
-		ContainerInterface $securityProviderFactory,
-		ContainerInterface $bodyEncoderFactory,
-		ContainerInterface $bodyDecoderFactory
+		PluginManagerInterface $securityProviderFactory,
+		PluginManagerInterface $bodyEncoderFactory,
+		PluginManagerInterface $bodyDecoderFactory
 	)
 	{
 		$this->serverUrl = $serverUrl;
@@ -93,10 +89,10 @@ abstract class AbstractApiClient
 		$pathTemplateReplacements = [];
 		foreach ($pathParameters as $pathParameterName => $pathParameterValue)
 		{
-			$pathTemplateReplacements['{' . $pathParameterName . '}'] = \rawurlencode($pathParameterValue);
+			$pathTemplateReplacements['{' . $pathParameterName . '}'] = rawurlencode($pathParameterValue);
 		}
-		$path = empty($pathTemplateReplacements) ? $pathTemplate : \strtr($pathTemplate, $pathTemplateReplacements);
-		$queryString = empty($queryParameters) ? '' : '?' . \http_build_query($queryParameters, '', '&', \PHP_QUERY_RFC3986);
+		$path = empty($pathTemplateReplacements) ? $pathTemplate : strtr($pathTemplate, $pathTemplateReplacements);
+		$queryString = empty($queryParameters) ? '' : '?' . http_build_query($queryParameters, '', '&', PHP_QUERY_RFC3986);
 		return $this->requestFactory->createRequest($method, $this->serverUrl . $path . $queryString);
 	}
 
@@ -105,7 +101,7 @@ abstract class AbstractApiClient
 	 * @return array
 	 * @throws DTException\InvalidData
 	 */
-	protected function getPathParameters($parameters): array
+	protected function getPathParameters(object $parameters): array
 	{
 		return $this->dt->extractFromTypedData($parameters, self::SUBSET_PATH) ?? [];
 	}
@@ -115,7 +111,7 @@ abstract class AbstractApiClient
 	 * @return array
 	 * @throws DTException\InvalidData
 	 */
-	protected function getQueryParameters($parameters): array
+	protected function getQueryParameters(object $parameters): array
 	{
 		return $this->dt->extractFromTypedData($parameters, self::SUBSET_QUERY) ?? [];
 	}
@@ -126,7 +122,7 @@ abstract class AbstractApiClient
 	 * @return RequestInterface
 	 * @throws DTException\InvalidData
 	 */
-	protected function addCustomHeaders(RequestInterface $request, $parameters): RequestInterface
+	protected function addCustomHeaders(RequestInterface $request, object $parameters): RequestInterface
 	{
 		$headers = $this->dt->extractFromTypedData($parameters, self::SUBSET_HEADER) ?? [];
 		foreach ($headers as $headerName => $headerValue)
@@ -142,12 +138,12 @@ abstract class AbstractApiClient
 	 * @return RequestInterface
 	 * @throws DTException\InvalidData
 	 */
-	protected function addCookies(RequestInterface $request, $parameters): RequestInterface
+	protected function addCookies(RequestInterface $request, object $parameters): RequestInterface
 	{
 		$cookies = $this->dt->extractFromTypedData($parameters, self::SUBSET_COOKIE) ?? [];
 		if (!empty($cookies))
 		{
-			$request = $request->withHeader('Cookie', \http_build_query($cookies, '', '; ', \PHP_QUERY_RFC3986));
+			$request = $request->withHeader('Cookie', http_build_query($cookies, '', '; ', PHP_QUERY_RFC3986));
 		}
 		return $request;
 	}
@@ -161,7 +157,7 @@ abstract class AbstractApiClient
 	 */
 	protected function addBody(RequestInterface $request, string $mediaType, $content): RequestInterface
 	{
-		$contentData = \is_object($content) ? $this->dt->extractFromTypedData($content) : $content;
+		$contentData = is_object($content) ? $this->dt->extractFromTypedData($content) : $content;
 		$bodyEncoder = $this->getBodyEncoder($mediaType);
 		return $request
 			->withHeader('Content-Type', $mediaType)
@@ -175,7 +171,7 @@ abstract class AbstractApiClient
 	 */
 	protected function getBodyEncoder(string $mediaType): BodyEncoderInterface
 	{
-		return $this->bodyEncoderFactory->get($mediaType);
+		return ($this->bodyEncoderFactory)($mediaType, []);
 	}
 
 	/**
@@ -190,7 +186,7 @@ abstract class AbstractApiClient
 
 	/**
 	 * @param RequestInterface $request
-	 * @param iterable $security
+	 * @param iterable<string, string[]> $security
 	 * @return RequestInterface
 	 */
 	protected function addSecurity(RequestInterface $request, iterable $security): RequestInterface
@@ -209,7 +205,7 @@ abstract class AbstractApiClient
 	 */
 	protected function getSecurityProvider(string $securitySchemaName): SecurityProviderInterface
 	{
-		return $this->securityProviderFactory->get($securitySchemaName);
+		return ($this->securityProviderFactory)($securitySchemaName, []);
 	}
 
 	/**
@@ -226,7 +222,7 @@ abstract class AbstractApiClient
 			$bodyDecoder = $this->getBodyDecoder($mediaType);
 			$contentData = $bodyDecoder->decode($response->getBody());
 		}
-		if (\is_object($content))
+		if (is_object($content))
 		{
 			$violations = $this->dt->transferToTypedData($contentData, $content);
 			if (!empty($violations))
@@ -246,11 +242,11 @@ abstract class AbstractApiClient
 	 */
 	protected function getBodyDecoder(string $mediaType): BodyDecoderInterface
 	{
-		return $this->bodyDecoderFactory->get($mediaType);
+		return ($this->bodyDecoderFactory)($mediaType, []);
 	}
 
 	/**
-	 * @param $content
+	 * @param mixed $content
 	 * @param iterable $headers
 	 * @param int $statusCode
 	 * @param string $reasonPhrase

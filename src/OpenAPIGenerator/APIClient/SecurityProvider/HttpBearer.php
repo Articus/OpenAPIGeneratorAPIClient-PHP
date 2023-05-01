@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace OpenAPIGenerator\APIClient\SecurityProvider;
 
+use InvalidArgumentException;
+use LogicException;
 use OpenAPIGenerator\APIClient\SecurityProviderInterface;
 use Psr\Http\Message\RequestInterface;
+use function preg_match;
 
 class HttpBearer implements SecurityProviderInterface
 {
-	/**
-	 * @var string
-	 */
-	protected $token = '';
+	protected string $token = '';
 
 	/**
 	 * @return string
@@ -27,9 +27,9 @@ class HttpBearer implements SecurityProviderInterface
 	 */
 	public function setToken(string $token): self
 	{
-		if (\preg_match('#^[[:alnum:]\-\._~\+/]+=*$#', $token) !== 1)
+		if (preg_match('#^[[:alnum:]\-\._~\+/]+=*$#', $token) !== 1)
 		{
-			throw new \InvalidArgumentException('Invalid bearer token for HTTP authentication');
+			throw new InvalidArgumentException('Invalid bearer token for HTTP authentication');
 		}
 		$this->token = $token;
 		return $this;
@@ -42,7 +42,7 @@ class HttpBearer implements SecurityProviderInterface
 	{
 		if (empty($this->token))
 		{
-			throw new \LogicException('Bearer token should be set before using security provider');
+			throw new LogicException('Bearer token should be set before using security provider');
 		}
 		return $request->withHeader('Authorization', 'Bearer ' . $this->token);
 	}
