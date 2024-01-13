@@ -23,24 +23,12 @@ abstract class AbstractApiClient
 	public const SUBSET_HEADER = 'header';
 	public const SUBSET_COOKIE = 'cookie';
 
-	/**
-	 * @var string
-	 */
 	protected string $serverUrl;
 
-	/**
-	 * @var DTService
-	 */
 	protected DTService $dt;
 
-	/**
-	 * @var RequestFactoryInterface
-	 */
 	protected RequestFactoryInterface $requestFactory;
 
-	/**
-	 * @var ClientInterface
-	 */
 	protected ClientInterface $httpClient;
 
 	/**
@@ -80,8 +68,8 @@ abstract class AbstractApiClient
 	/**
 	 * @param string $method
 	 * @param string $pathTemplate
-	 * @param array $pathParameters
-	 * @param array $queryParameters
+	 * @param array<string, string> $pathParameters map <parameter name> -> <parameter value>
+	 * @param array<string, mixed> $queryParameters map <parameter name> -> <parameter value>
 	 * @return RequestInterface
 	 */
 	protected function createRequest(string $method, string $pathTemplate, array $pathParameters, array $queryParameters): RequestInterface
@@ -98,7 +86,7 @@ abstract class AbstractApiClient
 
 	/**
 	 * @param object $parameters
-	 * @return array
+	 * @return array<string, string> map <parameter name> -> <parameter value>
 	 * @throws DTException\InvalidData
 	 */
 	protected function getPathParameters(object $parameters): array
@@ -108,7 +96,7 @@ abstract class AbstractApiClient
 
 	/**
 	 * @param object $parameters
-	 * @return array
+	 * @return array<string, mixed> map <parameter name> -> <parameter value>
 	 * @throws DTException\InvalidData
 	 */
 	protected function getQueryParameters(object $parameters): array
@@ -165,20 +153,11 @@ abstract class AbstractApiClient
 		;
 	}
 
-	/**
-	 * @param string $mediaType
-	 * @return BodyEncoderInterface
-	 */
 	protected function getBodyEncoder(string $mediaType): BodyEncoderInterface
 	{
 		return ($this->bodyEncoderFactory)($mediaType, []);
 	}
 
-	/**
-	 * @param RequestInterface $request
-	 * @param string $mediaTypeRange
-	 * @return RequestInterface
-	 */
 	protected function addAcceptHeader(RequestInterface $request, string $mediaTypeRange): RequestInterface
 	{
 		return $request->withHeader('Accept', $mediaTypeRange);
@@ -196,13 +175,9 @@ abstract class AbstractApiClient
 			$securityProvider = $this->getSecurityProvider($securitySchemaName);
 			$request = $securityProvider->fulfillRequirements($request, $securityRequirements);
 		}
-		return  $request;
+		return $request;
 	}
 
-	/**
-	 * @param string $securitySchemaName
-	 * @return SecurityProviderInterface
-	 */
 	protected function getSecurityProvider(string $securitySchemaName): SecurityProviderInterface
 	{
 		return ($this->securityProviderFactory)($securitySchemaName, []);
@@ -211,6 +186,7 @@ abstract class AbstractApiClient
 	/**
 	 * @param ResponseInterface $response
 	 * @param mixed $content
+	 * @return void
 	 * @throws Exception\InvalidResponseBodySchema
 	 */
 	protected function parseBody(ResponseInterface $response, &$content): void
@@ -236,10 +212,6 @@ abstract class AbstractApiClient
 		}
 	}
 
-	/**
-	 * @param string $mediaType
-	 * @return BodyDecoderInterface
-	 */
 	protected function getBodyDecoder(string $mediaType): BodyDecoderInterface
 	{
 		return ($this->bodyDecoderFactory)($mediaType, []);
@@ -247,7 +219,7 @@ abstract class AbstractApiClient
 
 	/**
 	 * @param mixed $content
-	 * @param iterable $headers
+	 * @param iterable<string, string[]> $headers
 	 * @param int $statusCode
 	 * @param string $reasonPhrase
 	 * @return mixed

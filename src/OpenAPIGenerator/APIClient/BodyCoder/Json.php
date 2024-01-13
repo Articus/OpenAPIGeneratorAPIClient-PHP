@@ -26,12 +26,7 @@ class Json implements BodyCoderInterface
 	protected bool $decodeAsAssociativeArray;
 
 	protected int $depth;
-	/**
-	 * @param StreamFactoryInterface $streamFactory
-	 * @param int $encodeFlags
-	 * @param int $decodeFlags
-	 * @param int $depth
-	 */
+
 	public function __construct(StreamFactoryInterface $streamFactory, int $encodeFlags, int $decodeFlags, int $depth)
 	{
 		$this->streamFactory = $streamFactory;

@@ -8,6 +8,11 @@ use spec\Utility\GlobalFunctionMock;
 
 describe(OAGAC\BodyCoder\Json::class, function ()
 {
+	afterEach(function ()
+	{
+		GlobalFunctionMock::reset();
+		Mockery::close();
+	});
 	describe('->encode', function ()
 	{
 		it('creates stream with data encoded to JSON', function ()

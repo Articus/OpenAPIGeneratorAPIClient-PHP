@@ -9,7 +9,7 @@ use OpenAPIGenerator\APIClient\BodyCoder;
 use Psr\Container\ContainerInterface;
 use function array_merge_recursive;
 
-class SimplePluginManager extends PM\Factory\Simple
+class PluginManager extends PM\Factory\Simple
 {
 	public function __construct(string $configKey = ApiClientOptions::DEFAULT_BODY_CODER_PLUGIN_MANAGER)
 	{

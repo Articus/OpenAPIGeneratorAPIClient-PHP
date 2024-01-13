@@ -6,6 +6,10 @@ use Psr\Http\Message\RequestInterface;
 
 describe(OAGAC\SecurityProvider\HttpBearer::class, function ()
 {
+	afterEach(function ()
+	{
+		Mockery::close();
+	});
  	it('adds authorization header with provided token', function ()
 	{
 		$token1 = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-._~+/';

@@ -13,18 +13,11 @@ class HttpBearer implements SecurityProviderInterface
 {
 	protected string $token = '';
 
-	/**
-	 * @return string
-	 */
 	public function getToken(): string
 	{
 		return $this->token;
 	}
 
-	/**
-	 * @param string $token
-	 * @return self
-	 */
 	public function setToken(string $token): self
 	{
 		if (preg_match('#^[[:alnum:]\-\._~\+/]+=*$#', $token) !== 1)

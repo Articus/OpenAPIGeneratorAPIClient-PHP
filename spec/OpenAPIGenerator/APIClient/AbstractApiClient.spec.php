@@ -13,6 +13,10 @@ use spec\Example;
 
 describe(OAGAC\AbstractApiClient::class, function ()
 {
+	afterEach(function ()
+	{
+		Mockery::close();
+	});
 	context('->createRequest', function ()
 	{
 		it('creates request without parameters', function ()
@@ -301,7 +305,7 @@ describe(OAGAC\AbstractApiClient::class, function ()
 
 			$response = mock(ResponseInterface::class);
 			$content = ['test' => 123];
-			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn(null)->once();
+			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn([])->once();
 
 			$client = new Example\DummyApiClient($url, $dt, $requestFactory, $httpClient, $securityProviderFactory, $bodyEncoderFactory, $bodyDecoderFactory);
 			$client->parseBody($response, $content);
@@ -320,7 +324,7 @@ describe(OAGAC\AbstractApiClient::class, function ()
 			$response = mock(ResponseInterface::class);
 			$content0 = mock();
 			$content1 = mock();
-			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn(null)->once();
+			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn([])->once();
 			$dt->shouldReceive('transferToTypedData')->withArgs(
 				function ($a, &$b) use (&$content0, &$content1)
 				{
@@ -350,7 +354,7 @@ describe(OAGAC\AbstractApiClient::class, function ()
 			$response = mock(ResponseInterface::class);
 			$content = mock();
 			$violations = ['test' => 123];
-			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn(null)->once();
+			$response->shouldReceive('getHeader')->with('Content-Type')->andReturn([])->once();
 			$dt->shouldReceive('transferToTypedData')->with(null, $content)->andReturn($violations)->once();
 
 			$client = new Example\DummyApiClient($url, $dt, $requestFactory, $httpClient, $securityProviderFactory, $bodyEncoderFactory, $bodyDecoderFactory);

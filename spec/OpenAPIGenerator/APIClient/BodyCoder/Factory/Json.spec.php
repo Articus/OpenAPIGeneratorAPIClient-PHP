@@ -7,6 +7,10 @@ use Psr\Http\Message\StreamFactoryInterface;
 
 describe(OAGAC\BodyCoder\Factory\Json::class, function ()
 {
+	afterEach(function ()
+	{
+		Mockery::close();
+	});
 	it('creates service with empty options', function ()
 	{
 		$container = mock(ContainerInterface::class);

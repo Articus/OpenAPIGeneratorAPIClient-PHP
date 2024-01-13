@@ -10,25 +10,21 @@ class Json
 {
 	/**
 	 * Service name for stream factory implementation inside container
-	 * @var string
 	 */
 	public string $streamFactoryServiceName = StreamFactoryInterface::class;
 
 	/**
 	 * Flags for json_encode
-	 * @var int
 	 */
 	public int $encodeFlags = 0;
 
 	/**
 	 * Flags for json_decode
-	 * @var int
 	 */
 	public int $decodeFlags = JSON_OBJECT_AS_ARRAY;
 
 	/**
 	 * Depth for json_encode and json_decode
-	 * @var int
 	 */
 	public int $depth = 512;
 

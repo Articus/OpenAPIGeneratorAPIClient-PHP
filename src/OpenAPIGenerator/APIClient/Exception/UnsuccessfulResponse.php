@@ -14,13 +14,13 @@ class UnsuccessfulResponse extends Exception
 	protected $responseContent;
 
 	/**
-	 * @var string[][]
+	 * @var iterable<string, string[]>
 	 */
 	protected iterable $responseHeaders;
 
 	/**
-	 * @param $responseContent
-	 * @param string[][] $responseHeaders
+	 * @param mixed $responseContent
+	 * @param iterable<string, string[]> $responseHeaders
 	 * @param int $responseStatusCode
 	 * @param string $responseReasonPhrase
 	 * @param Throwable|null $previous
@@ -30,7 +30,7 @@ class UnsuccessfulResponse extends Exception
 		iterable $responseHeaders,
 		int $responseStatusCode,
 		string $responseReasonPhrase,
-		Throwable $previous = null
+		?Throwable $previous = null
 	)
 	{
 		parent::__construct($responseReasonPhrase, $responseStatusCode, $previous);
@@ -47,7 +47,7 @@ class UnsuccessfulResponse extends Exception
 	}
 
 	/**
-	 * @return string[][]
+	 * @return iterable<string, string[]>
 	 */
 	public function getResponseHeaders(): iterable
 	{

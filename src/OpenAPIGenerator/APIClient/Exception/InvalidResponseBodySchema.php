@@ -20,17 +20,11 @@ class InvalidResponseBodySchema extends Exception
 		$this->violations = $violations;
 	}
 
-	/**
-	 * @return ResponseInterface
-	 */
 	public function getResponse(): ResponseInterface
 	{
 		return $this->response;
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getViolations(): array
 	{
 		return $this->violations;

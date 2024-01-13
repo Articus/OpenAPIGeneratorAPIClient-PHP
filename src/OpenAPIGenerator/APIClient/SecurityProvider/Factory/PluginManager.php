@@ -9,7 +9,7 @@ use OpenAPIGenerator\APIClient\SecurityProvider;
 use Psr\Container\ContainerInterface;
 use function array_merge_recursive;
 
-class LaminasPluginManager extends PM\Factory\Laminas
+class PluginManager extends PM\Factory\Simple
 {
 	public function __construct(string $configKey = ApiClientOptions::DEFAULT_SECURITY_PROVIDER_PLUGIN_MANAGER)
 	{
@@ -26,7 +26,7 @@ class LaminasPluginManager extends PM\Factory\Laminas
 				'HttpBearer' => SecurityProvider\HttpBearer::class,
 				'http-bearer' => SecurityProvider\HttpBearer::class,
 			],
-			'shared' => [
+			'shares' => [
 				SecurityProvider\HttpBearer::class => true,
 			],
 		];

@@ -14,8 +14,9 @@ use function uopz_unset_return;
 class GlobalFunctionMock
 {
 	protected static ?MockInterface $innerMock = null;
+
 	/**
-	 * @var string[]
+	 * @var array<string, true>
 	 */
 	protected static array $functionNameMap = [];
 
