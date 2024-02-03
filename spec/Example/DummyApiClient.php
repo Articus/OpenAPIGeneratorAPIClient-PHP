@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace spec\Example;
 
+use Articus\DataTransfer\Strategy\StrategyInterface as DTStrategy;
+use Articus\DataTransfer\Validator\ValidatorInterface as DTValidator;
 use OpenAPIGenerator\APIClient as OAGAC;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -34,9 +36,9 @@ class DummyApiClient extends OAGAC\AbstractApiClient
 		return parent::addCookies($request, $parameters);
 	}
 
-	public function addBody(RequestInterface $request, string $mediaType, $content): RequestInterface
+	public function addBody(RequestInterface $request, string $mediaType, $content, ?DTStrategy $contentStrategy = null): RequestInterface
 	{
-		return parent::addBody($request, $mediaType, $content);
+		return parent::addBody($request, $mediaType, $content, $contentStrategy);
 	}
 
 	public function addAcceptHeader(RequestInterface $request, string $mediaTypeRange): RequestInterface
@@ -49,9 +51,9 @@ class DummyApiClient extends OAGAC\AbstractApiClient
 		return parent::addSecurity($request, $security);
 	}
 
-	public function parseBody(ResponseInterface $response, &$content): void
+	public function parseBody(ResponseInterface $response, &$content, ?DTStrategy $contentStrategy = null, ?DTValidator $contentValidator = null): void
 	{
-		parent::parseBody($response, $content);
+		parent::parseBody($response, $content, $contentStrategy, $contentValidator);
 	}
 
 	public function getSuccessfulContent($content, iterable $headers, int $statusCode, string $reasonPhrase)

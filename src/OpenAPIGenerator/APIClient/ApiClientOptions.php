@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace OpenAPIGenerator\APIClient;
 
-use Articus\DataTransfer\Service as DTService;
+use Articus\DataTransfer as DT;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 
@@ -14,7 +14,7 @@ class ApiClientOptions
 
 	public string $serverUrl = 'http://localhost';
 
-	public string $dataTransferServiceName = DTService::class;
+	public string $dataTransferServiceName = DT\Service::class;
 
 	public string $requestFactoryServiceName = RequestFactoryInterface::class;
 
@@ -23,6 +23,10 @@ class ApiClientOptions
 	public string $securityProviderFactoryServiceName = self::DEFAULT_SECURITY_PROVIDER_PLUGIN_MANAGER;
 
 	public string $bodyCoderFactoryServiceName = self::DEFAULT_BODY_CODER_PLUGIN_MANAGER;
+
+	public string $contentStrategyFactoryServiceName = DT\Options::DEFAULT_STRATEGY_PLUGIN_MANAGER;
+
+	public string $contentValidatorFactoryServiceName = DT\Options::DEFAULT_VALIDATOR_PLUGIN_MANAGER;
 
 	public function __construct(iterable $options)
 	{
@@ -53,6 +57,14 @@ class ApiClientOptions
 				case 'bodyCoderFactoryServiceName':
 				case 'body_coder_factory_service_name':
 					$this->bodyCoderFactoryServiceName = $value;
+					break;
+				case 'contentStrategyFactoryServiceName':
+				case 'content_strategy_factory_service_name':
+					$this->contentStrategyFactoryServiceName = $value;
+					break;
+				case 'contentValidatorFactoryServiceName':
+				case 'content_validator_factory_service_name':
+					$this->contentValidatorFactoryServiceName = $value;
 					break;
 			}
 		}

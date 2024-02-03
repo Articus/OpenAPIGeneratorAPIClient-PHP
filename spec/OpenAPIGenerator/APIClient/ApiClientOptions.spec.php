@@ -15,6 +15,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 			$httpClientServiceName = 'test_http_client_service';
 			$securityProviderFactoryServiceName = 'test_security_provider_factory_service';
 			$bodyCoderFactoryServiceName = 'test_body_code_factory_service';
+			$contentStrategyFactoryServiceName = 'test_content_strategy_factory_service';
+			$contentValidatorFactoryServiceName = 'test_content_validator_factory_service';
 			$options = new OAGAC\ApiClientOptions([
 				'server_url' => $serverUrl,
 				'data_transfer_service_name' => $dtServiceName,
@@ -22,6 +24,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 				'http_client_service_name' => $httpClientServiceName,
 				'security_provider_factory_service_name' => $securityProviderFactoryServiceName,
 				'body_coder_factory_service_name' => $bodyCoderFactoryServiceName,
+				'content_strategy_factory_service_name' => $contentStrategyFactoryServiceName,
+				'content_validator_factory_service_name' => $contentValidatorFactoryServiceName,
 			]);
 			expect($options->serverUrl)->toBe($serverUrl);
 			expect($options->dataTransferServiceName)->toBe($dtServiceName);
@@ -29,6 +33,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 			expect($options->httpClientServiceName)->toBe($httpClientServiceName);
 			expect($options->securityProviderFactoryServiceName)->toBe($securityProviderFactoryServiceName);
 			expect($options->bodyCoderFactoryServiceName)->toBe($bodyCoderFactoryServiceName);
+			expect($options->contentStrategyFactoryServiceName)->toBe($contentStrategyFactoryServiceName);
+			expect($options->contentValidatorFactoryServiceName)->toBe($contentValidatorFactoryServiceName);
 		});
 		it('allows camel-cased keys', function ()
 		{
@@ -38,6 +44,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 			$httpClientServiceName = 'test_http_client_service';
 			$securityProviderFactoryServiceName = 'test_security_provider_factory_service';
 			$bodyCoderFactoryServiceName = 'test_body_code_factory_service';
+			$contentStrategyFactoryServiceName = 'test_content_strategy_factory_service';
+			$contentValidatorFactoryServiceName = 'test_content_validator_factory_service';
 			$options = new OAGAC\ApiClientOptions([
 				'serverUrl' => $serverUrl,
 				'dataTransferServiceName' => $dtServiceName,
@@ -45,6 +53,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 				'httpClientServiceName' => $httpClientServiceName,
 				'securityProviderFactoryServiceName' => $securityProviderFactoryServiceName,
 				'bodyCoderFactoryServiceName' => $bodyCoderFactoryServiceName,
+				'contentStrategyFactoryServiceName' => $contentStrategyFactoryServiceName,
+				'contentValidatorFactoryServiceName' => $contentValidatorFactoryServiceName,
 			]);
 			expect($options->serverUrl)->toBe($serverUrl);
 			expect($options->dataTransferServiceName)->toBe($dtServiceName);
@@ -52,6 +62,8 @@ describe(OAGAC\ApiClientOptions::class, function ()
 			expect($options->httpClientServiceName)->toBe($httpClientServiceName);
 			expect($options->securityProviderFactoryServiceName)->toBe($securityProviderFactoryServiceName);
 			expect($options->bodyCoderFactoryServiceName)->toBe($bodyCoderFactoryServiceName);
+			expect($options->contentStrategyFactoryServiceName)->toBe($contentStrategyFactoryServiceName);
+			expect($options->contentValidatorFactoryServiceName)->toBe($contentValidatorFactoryServiceName);
 		});
 	});
 });

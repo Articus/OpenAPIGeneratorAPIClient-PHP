@@ -5,6 +5,8 @@ namespace OpenAPIGenerator\APIClient;
 
 use Articus\DataTransfer\Exception as DTException;
 use Articus\DataTransfer\Service as DTService;
+use Articus\DataTransfer\Strategy as DTStrategy;
+use Articus\DataTransfer\Validator as DTValidator;
 use Articus\PluginManager\PluginManagerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -34,35 +36,60 @@ abstract class AbstractApiClient
 	/**
 	 * @var PluginManagerInterface<SecurityProviderInterface>
 	 */
-	protected PluginManagerInterface $securityProviderFactory;
+	protected PluginManagerInterface $securityProviders;
 
 	/**
 	 * @var PluginManagerInterface<BodyEncoderInterface>
 	 */
-	protected PluginManagerInterface $bodyEncoderFactory;
+	protected PluginManagerInterface $bodyEncoders;
 
 	/**
 	 * @var PluginManagerInterface<BodyDecoderInterface>
 	 */
-	protected PluginManagerInterface $bodyDecoderFactory;
+	protected PluginManagerInterface $bodyDecoders;
+
+	/**
+	 * @var PluginManagerInterface<DTStrategy\StrategyInterface>
+	 */
+	protected PluginManagerInterface $contentStrategies;
+
+	/**
+	 * @var PluginManagerInterface<DTValidator\ValidatorInterface>
+	 */
+	protected PluginManagerInterface $contentValidators;
+
 
 	public function __construct(
 		string $serverUrl,
 		DTService $dt,
 		RequestFactoryInterface $requestFactory,
 		ClientInterface $httpClient,
-		PluginManagerInterface $securityProviderFactory,
-		PluginManagerInterface $bodyEncoderFactory,
-		PluginManagerInterface $bodyDecoderFactory
+		PluginManagerInterface $securityProviders,
+		PluginManagerInterface $bodyEncoders,
+		PluginManagerInterface $bodyDecoders,
+		PluginManagerInterface $contentStrategies,
+		PluginManagerInterface $contentValidators
 	)
 	{
 		$this->serverUrl = $serverUrl;
 		$this->dt = $dt;
 		$this->requestFactory = $requestFactory;
 		$this->httpClient = $httpClient;
-		$this->securityProviderFactory = $securityProviderFactory;
-		$this->bodyEncoderFactory = $bodyEncoderFactory;
-		$this->bodyDecoderFactory = $bodyDecoderFactory;
+		$this->securityProviders = $securityProviders;
+		$this->bodyEncoders = $bodyEncoders;
+		$this->bodyDecoders = $bodyDecoders;
+		$this->contentStrategies = $contentStrategies;
+		$this->contentValidators = $contentValidators;
+	}
+
+	protected function getNoopStrategy(): DTStrategy\StrategyInterface
+	{
+		return ($this->contentStrategies)(DTStrategy\Whatever::class, []);
+	}
+
+	protected function getNoopValidator(): DTValidator\ValidatorInterface
+	{
+		return ($this->contentValidators)(DTValidator\Whatever::class, []);
 	}
 
 	/**
@@ -115,7 +142,10 @@ abstract class AbstractApiClient
 		$headers = $this->dt->extractFromTypedData($parameters, self::SUBSET_HEADER) ?? [];
 		foreach ($headers as $headerName => $headerValue)
 		{
-			$request = $request->withHeader($headerName, $headerValue);
+			if ($headerValue !== null)
+			{
+				$request = $request->withHeader($headerName, $headerValue);
+			}
 		}
 		return $request;
 	}
@@ -140,12 +170,37 @@ abstract class AbstractApiClient
 	 * @param RequestInterface $request
 	 * @param string $mediaType
 	 * @param mixed $content
+	 * @param null|DTStrategy\StrategyInterface $contentStrategy
 	 * @return RequestInterface
 	 * @throws DTException\InvalidData
 	 */
-	protected function addBody(RequestInterface $request, string $mediaType, $content): RequestInterface
+	protected function addBody(
+		RequestInterface $request,
+		string $mediaType,
+		$content,
+		?DTStrategy\StrategyInterface $contentStrategy = null
+	): RequestInterface
 	{
-		$contentData = is_object($content) ? $this->dt->extractFromTypedData($content) : $content;
+		$contentData = null;
+		if ($contentStrategy !== null)
+		{
+			$noopStrategy = $this->getNoopStrategy();
+			$noopValidator = $this->getNoopValidator();
+			$violations = $this->dt->transfer($content, $contentStrategy, $contentData, $noopStrategy, $noopStrategy, $noopValidator, $noopStrategy);
+			if (!empty($violations))
+			{
+				throw new DTException\InvalidData($violations);
+			}
+		}
+		elseif (is_object($content))
+		{
+			$contentData = $this->dt->extractFromTypedData($content);
+		}
+		else
+		{
+			$contentData = $content;
+		}
+
 		$bodyEncoder = $this->getBodyEncoder($mediaType);
 		return $request
 			->withHeader('Content-Type', $mediaType)
@@ -155,7 +210,7 @@ abstract class AbstractApiClient
 
 	protected function getBodyEncoder(string $mediaType): BodyEncoderInterface
 	{
-		return ($this->bodyEncoderFactory)($mediaType, []);
+		return ($this->bodyEncoders)($mediaType, []);
 	}
 
 	protected function addAcceptHeader(RequestInterface $request, string $mediaTypeRange): RequestInterface
@@ -180,16 +235,23 @@ abstract class AbstractApiClient
 
 	protected function getSecurityProvider(string $securitySchemaName): SecurityProviderInterface
 	{
-		return ($this->securityProviderFactory)($securitySchemaName, []);
+		return ($this->securityProviders)($securitySchemaName, []);
 	}
 
 	/**
 	 * @param ResponseInterface $response
 	 * @param mixed $content
+	 * @param null|DTStrategy\StrategyInterface $contentStrategy
+	 * @param null|DTValidator\ValidatorInterface $contentValidator
 	 * @return void
 	 * @throws Exception\InvalidResponseBodySchema
 	 */
-	protected function parseBody(ResponseInterface $response, &$content): void
+	protected function parseBody(
+		ResponseInterface $response,
+		&$content,
+		?DTStrategy\StrategyInterface $contentStrategy = null,
+		?DTValidator\ValidatorInterface $contentValidator = null
+	): void
 	{
 		$contentData = null;
 		$mediaType = $response->getHeader('Content-Type')[0] ?? null;
@@ -198,7 +260,17 @@ abstract class AbstractApiClient
 			$bodyDecoder = $this->getBodyDecoder($mediaType);
 			$contentData = $bodyDecoder->decode($response->getBody());
 		}
-		if (is_object($content))
+
+		if (($contentStrategy !== null) && ($contentValidator !== null))
+		{
+			$noopStrategy = $this->getNoopStrategy();
+			$violations = $this->dt->transfer($contentData, $noopStrategy, $content, $contentStrategy, $contentStrategy, $contentValidator, $contentStrategy);
+			if (!empty($violations))
+			{
+				throw new Exception\InvalidResponseBodySchema($response, $violations);
+			}
+		}
+		elseif (is_object($content))
 		{
 			$violations = $this->dt->transferToTypedData($contentData, $content);
 			if (!empty($violations))
@@ -214,7 +286,7 @@ abstract class AbstractApiClient
 
 	protected function getBodyDecoder(string $mediaType): BodyDecoderInterface
 	{
-		return ($this->bodyDecoderFactory)($mediaType, []);
+		return ($this->bodyDecoders)($mediaType, []);
 	}
 
 	/**

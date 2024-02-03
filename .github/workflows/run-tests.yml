@@ -10,9 +10,7 @@ jobs:
       matrix:
         include:
           - php: '7.4'
-            has_unique_dependencies: true
           - php: '8.0'
-            has_unique_dependencies: true
           - php: '8.1'
           - php: '8.2'
           - php: '8.3'
@@ -24,10 +22,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Use unique composer.lock
-        if: matrix.has_unique_dependencies
-        run: cp ./composer.lock.${{ matrix.php }} ./composer.lock
 
       - name: Enable UOPZ extension
         run: phpenmod uopz
