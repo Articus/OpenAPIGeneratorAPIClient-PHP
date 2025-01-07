@@ -13,7 +13,7 @@ class InvalidResponseBodySchema extends Exception
 
 	protected array $violations;
 
-	public function __construct(ResponseInterface $response, array $violations = [], Throwable $previous = null)
+	public function __construct(ResponseInterface $response, array $violations = [], ?Throwable $previous = null)
 	{
 		parent::__construct('Invalid response body schema', 0, $previous);
 		$this->response = $response;
